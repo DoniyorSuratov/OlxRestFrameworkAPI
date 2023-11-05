@@ -3,6 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from accounts.serializers import UserSerializer
+from .models import SellMessages, BuyMessage
+from .serializers import SellMessagesSerializer, BuyMessagesSerializer
 
 User = get_user_model()
 
@@ -43,3 +45,45 @@ class UserInfoAPIView(APIView):
         user = request.user
         user_serializer = UserSerializer(user)
         return Response({'success':True, 'data': user_serializer.data})
+
+
+class UserMessageSellAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self, request):
+        messages = SellMessages.objects.all()
+        messages_data = SellMessagesSerializer(messages, many=True)
+        return Response({'success':True, 'data': messages_data.data})
+
+    def post(self, request):
+        user = request.user
+        message = request.data.get('message')
+        message = SellMessages.objects.create(
+            user = user,
+            message=message
+        )
+        message.save()
+        messages_serializer = SellMessagesSerializer(message)
+        return Response(messages_serializer.data)
+
+
+
+
+
+class BuyMessagesAPIView(APIView):
+    permission_classes = (IsAuthenticated, )
+    def get(self, request):
+        message = BuyMessage.objects.all()
+        message_data = BuyMessagesSerializer(message, many=True)
+        return Response({'success': True, 'data':message_data.data})
+
+
+    def post(self, request):
+        user = request.user
+        message = request.data.get('message')
+        messages = BuyMessage.objects.create(
+            user=user,
+            message=message
+        )
+        messages.save()
+        message_serializer = BuyMessagesSerializer(messages)
+        return Response(message_serializer.data)
