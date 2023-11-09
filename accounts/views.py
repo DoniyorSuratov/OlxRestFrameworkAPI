@@ -52,7 +52,9 @@ class UserMessageSellAPIView(APIView):
     def get(self, request):
         messages = SellMessages.objects.all()
         messages_data = SellMessagesSerializer(messages, many=True)
-        return Response({'success':True, 'data': messages_data.data})
+        if messages_data.data:
+            return Response({'success':True, 'data': messages_data.data})
+        return Response({'success':False}, status=404)
 
     def post(self, request):
         user = request.user
