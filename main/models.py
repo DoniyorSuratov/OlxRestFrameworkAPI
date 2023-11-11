@@ -27,7 +27,7 @@ class Category(MPTTModel):
 
 
 class Product(models.Model):
-    user= models.ForeignKey('auth.User', on_delete=models.CASCADE, blank=True, null=True)
+    user= models.ForeignKey('auth.User', on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     slug = models.SlugField(blank=True, null=True)
     expires_at = models.DateTimeField(auto_now_add=True)
@@ -36,7 +36,7 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.category.name)
+            self.slug = slugify(f'{self.category.parent.name, self.category.name}')
         super().save(*args, **kwargs)
 
     def __str__(self):
