@@ -1,9 +1,9 @@
 from django.urls import path
-from .views import CreateAdvertisementDetskiymirView, GetAdvertisementDetskiymirView
+from .views import ProductPostView, ProductGetView
 
 urlpatterns=[
-    path('detskiymir/<str:slug>',GetAdvertisementDetskiymirView.as_view(), name='get-advertisement-detskiymir'),
-    path('create-detskiymir', CreateAdvertisementDetskiymirView.as_view(), name='create-advertisement-detskiymir'),
+    path('product/<str:slug>',ProductGetView.as_view(), name='get-advertisement-detskiymir'),
+    path('product', ProductPostView.as_view(), name='create-advertisement-detskiymir'),
 
 
 ]
