@@ -36,7 +36,10 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(f'{self.category.parent.name, self.category.name}')
+            if self.category.parent:
+                self.slug = slugify(f'{self.category.parent.name, self.category.name}')
+            else:
+                self.slug = slugify(f'{self.category.name}')
         super().save(*args, **kwargs)
 
     def __str__(self):
