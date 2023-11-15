@@ -6,8 +6,6 @@ urlpatterns=[
     path('product', ProductPostView.as_view(), name='create-advertisement-detskiymir'),
     path('product-update/<int:pk>', ProductUpdate.as_view(), name='product-update'),
     path('category-list', SearchAPIView.as_view(), name='categories'),
-
-
 ]
 
 
