@@ -19,3 +19,7 @@ class BuyMessagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = BuyMessage
         fields = '__all__'
+
+
+
+

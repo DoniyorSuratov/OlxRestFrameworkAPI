@@ -2,9 +2,10 @@ import datetime
 from datetime import timedelta
 from django.views import View
 from accounts.permissions import AdminPermissions
-from .models import Product
-from .serializers import ProductSerializer
+from .models import Product, Category
+from .serializers import ProductSerializer,QuerySerializer
 from django.db.models import Q
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -65,3 +66,19 @@ class ProductUpdate(GenericAPIView):
         product_.save()
         product_serializer = ProductSerializer(product_)
         return Response(product_serializer.data)
+
+
+class SearchAPIView(GenericAPIView):
+    permission_classes = ()
+    serializer_class = ProductSerializer
+    @swagger_auto_schema(query_serializer=QuerySerializer)
+    def get(self, request):
+        query = request.GET.get('query')
+        products = Product.objects.filter(category__name__icontains=query)
+        categories_data = []
+        for product in products:
+            category = Category.objects.filter(tree_id=product.category.tree_id).first()
+            if category:
+                category_serializer = ProductSerializer(category)
+                categories_data.append(category_serializer.data)
+        return Response(categories_data)
