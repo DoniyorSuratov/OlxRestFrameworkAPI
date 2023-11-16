@@ -68,17 +68,3 @@ class ProductUpdate(GenericAPIView):
         return Response(product_serializer.data)
 
 
-class SearchAPIView(GenericAPIView):
-    permission_classes = ()
-    serializer_class = ProductSerializer
-    @swagger_auto_schema(query_serializer=QuerySerializer)
-    def get(self, request):
-        query = request.GET.get('query')
-        products = Product.objects.filter(category__name__icontains=query)
-        categories_data = []
-        for product in products:
-            category = Category.objects.filter(tree_id=product.category.tree_id).first()
-            if category:
-                category_serializer = ProductSerializer(category)
-                categories_data.append(category_serializer.data)
-        return Response(categories_data)
