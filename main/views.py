@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.views import View
 from accounts.permissions import AdminPermissions
 from .models import Product, Category, Favourite
-from .serializers import ProductSerializer, FavouritsSerializer
+from .serializers import ProductSerializer, FavouritsSerializer, CategorySerializer
 from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
@@ -153,3 +153,26 @@ class FavouriteGetView(GenericAPIView): #getting favourite items
 
         favourite_serializer = FavouritsSerializer(my_favourites, many=True)
         return Response(favourite_serializer.data)
+
+
+
+class HobbyCategoryParentsView(generics.ListAPIView):
+    serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        hobby_category = Category.objects.get(name='Hobbi')
+        return hobby_category.get_ancestors(ascending=True)
+
+class OtdamDaromCategoryParentsView(generics.ListAPIView):
+    serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        otdam_darom_category = Category.objects.get(name='Otdam darom')
+        return otdam_darom_category.get_ancestors(ascending=True)
+
+class ObmenCategoryParentsView(generics.ListAPIView):
+    serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        obmen_category = Category.objects.get(name='Obmen')
+        return obmen_category.get_ancestors(ascending=True)

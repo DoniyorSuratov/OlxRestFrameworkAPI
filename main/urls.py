@@ -5,7 +5,10 @@ from .views import (ProductPostView,
                     UserAdverView,
                     FavouriteAdverView,
                     FavouriteGetView,
-                    ProductDeleteView)
+                    ProductDeleteView,
+                    HobbyCategoryParentsView,
+                    OtdamDaromCategoryParentsView,
+                    ObmenCategoryParentsView)
 urlpatterns=[
     path('get-product',ProductGetView.as_view(), name='get-advertisement'),
     path('product', ProductPostView.as_view(), name='create-advertisement'),
@@ -13,8 +16,9 @@ urlpatterns=[
     path('my-advertisement', UserAdverView.as_view(), name='my-advertisement'),
     path('favourits/<int:pk>', FavouriteAdverView.as_view(), name='favourits-post'),
     path('favourits/', FavouriteGetView.as_view(), name='favourits-get'),
-    path('delete-my-advertisement/<int:pk>', ProductDeleteView.as_view(), name='delete-my-advertisement')
-
+    path('delete-my-advertisement/<int:pk>', ProductDeleteView.as_view(), name='delete-my-advertisement'),
+    path('api/hobby-category-parents/', HobbyCategoryParentsView.as_view(), name='hobby-category-parents'),
+    path('api/otdam-darom-category-parents/', OtdamDaromCategoryParentsView.as_view(), name='otdam-darom-category-parents'),
+    path('api/obmen-category-parents/', ObmenCategoryParentsView.as_view(), name='obmen-category-parents'),
 ]
-
 
