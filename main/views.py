@@ -2,33 +2,47 @@ import datetime
 from datetime import timedelta
 from django.views import View
 from accounts.permissions import AdminPermissions
-from .models import Product, Category
-from .serializers import ProductSerializer
+from .models import Product, Category, Favourite
+from .serializers import ProductSerializer, FavouritsSerializer
 from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 
 
 
-class ProductGetView(GenericAPIView):
+# class ProductGetView(GenericAPIView):#get all products which are same slugs
+#     permission_classes = ()
+#     serializer_class = ProductSerializer
+#
+#     def get(self, request, slug):
+#         try:
+#             selectedproduct = Product.objects.filter(slug=slug)
+#                           # .filter(Q(expires_at__gte=datetime.datetime.now()-timedelta(days=3)) & Q(expires_at__lte=datetime.datetime.now())))
+#         except Product.DoesNotExist:
+#             return Response({'success': False}, status=404)
+#         selectedproduct_serializer = ProductSerializer(selectedproduct, many=True)
+#         return Response(selectedproduct_serializer.data)
+
+
+
+class ProductGetView(GenericAPIView):#get all products
     permission_classes = ()
     serializer_class = ProductSerializer
 
-    #get all products which are same slugs
-    def get(self, request, slug):
+    def get(self, request):
         try:
-            selectedproduct = Product.objects.filter(slug=slug)
-                          # .filter(Q(expires_at__gte=datetime.datetime.now()-timedelta(days=3)) & Q(expires_at__lte=datetime.datetime.now())))
+            selectedproduct = Product.objects.all()
         except Product.DoesNotExist:
             return Response({'success': False}, status=404)
         selectedproduct_serializer = ProductSerializer(selectedproduct, many=True)
         return Response(selectedproduct_serializer.data)
 
 
-#Get all advertisement of authenticated user
-class UserAdverView(GenericAPIView):
+
+class UserAdverView(GenericAPIView):    #Get all advertisement of authenticated user
     permission_classes = (IsAuthenticated,)
     serializer_class = ProductSerializer
 
@@ -39,22 +53,31 @@ class UserAdverView(GenericAPIView):
         return Response(product_serializer.data)
 
 
-#Posting advertisement
-class ProductPostView(GenericAPIView):
+
+class ProductPostView(GenericAPIView): #Posting advertisement
     permission_classes = (IsAuthenticated, )
     serializer = ProductSerializer
 
 
     def post(self, request):
         request.data['user']=request.user.id
-        detskiymir_serializer = ProductSerializer(data=request.data)
-        detskiymir_serializer.is_valid(raise_exception=True)
-        detskiymir_serializer.save()
-        return Response(detskiymir_serializer.data)
+        product_serializer = ProductSerializer(data=request.data)
+        product_serializer.is_valid(raise_exception=True)
+        product_serializer.save()
+        return Response(product_serializer.data)
 
 
-#Changing advertisement infos
-class ProductUpdate(GenericAPIView):
+class ProductDeleteView(GenericAPIView): #Delete own advertisement
+    permission_classes = (IsAuthenticated,)
+    serializer = ProductSerializer
+    def delete(self, request, pk):
+        Product.objects.get(Q(pk=pk) & Q(user=request.user)).delete()
+        product = Product.objects.all()
+        product_serializer = ProductSerializer(product, many=True)
+        return Response(product_serializer.data)
+
+
+class ProductUpdate(GenericAPIView):    #Changing own advertisement infos
     serializer_class = ProductSerializer
     permission_classes = (IsAuthenticated,)
 
@@ -70,9 +93,9 @@ class ProductUpdate(GenericAPIView):
         stage =request.data.get('stage')
         status =request.data.get('status')
 
-        product_ = Product.objects.get(Q(user=request.user) & Q(pk=pk))
+        product_ = Product.objects.get(Q(user=request.user) & Q(pk=pk)) #gets only this users advertisements
 
-        print(product_.product_type)
+        #changes product_type infos
         product_.product_type.update({'price' : price})
         product_.product_type.update({'name' : name})
         if color:
@@ -95,3 +118,38 @@ class ProductUpdate(GenericAPIView):
         return Response(product_serializer.data)
 
 
+class FavouriteAdverView(GenericAPIView): #adding to favourits
+    permission_classes = (IsAuthenticated,)
+    serializer_classes = FavouritsSerializer
+
+    def post(self, request, pk):
+        user = request.user
+        product = Product.objects.get(pk=pk)
+        print(request.data)
+        favourits = Favourite.objects.create(
+            user=user,
+            product=product
+        )
+        favourits.save()
+        favourits_serializer = FavouritsSerializer(favourits)
+        return Response(favourits_serializer.data)
+
+    def delete(self, request, pk):
+        Favourite.objects.get(pk=pk).delete()
+        favourite = Favourite.objects.filter(user=request.user)
+        favourite_serializer = FavouritsSerializer(favourite, many=True)
+        return Response(favourite_serializer.data)
+
+
+class FavouriteGetView(GenericAPIView): #getting favourite items
+    permission_classes = (IsAuthenticated,)
+    serializer_classes = FavouritsSerializer
+
+    def get(self, request):
+        try:
+            my_favourites = Favourite.objects.filter(user=request.user)
+        except Favourite.DoesNotExist:
+            return Response({'succes': "You don't have favourite items "},status=404 )
+
+        favourite_serializer = FavouritsSerializer(my_favourites, many=True)
+        return Response(favourite_serializer.data)
