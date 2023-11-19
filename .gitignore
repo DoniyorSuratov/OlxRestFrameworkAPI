@@ -1,6 +1,6 @@
 venv
 .env
-db.sqlite3
+base.sqlite3
 .idea/
 .vscode/
 *.pyc

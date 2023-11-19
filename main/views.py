@@ -1,9 +1,11 @@
 import datetime
 from datetime import timedelta
 from django.views import View
+from rest_framework import generics
+
 from accounts.permissions import AdminPermissions
 from .models import Product, Category, Favourite
-from .serializers import ProductSerializer, FavouritsSerializer, CategorySerializer
+from .serializers import ProductSerializer, FavouritsSerializer, CategorySerializer, QuerySerializer
 from django.db.models import Q
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
@@ -155,24 +157,15 @@ class FavouriteGetView(GenericAPIView): #getting favourite items
         return Response(favourite_serializer.data)
 
 
-
-class HobbyCategoryParentsView(generics.ListAPIView):
+class CategoryParentsView(GenericAPIView):
     serializer_class = CategorySerializer
+    @swagger_auto_schema(query_serializer=QuerySerializer)
+    def get(self, request):
+        hobbi = request.GET.get('query')
+        hobby_category = Category.objects.filter(Q(name=hobbi) & Q(parent=None)).values('tree_id')
+        categories = Category.objects.filter(tree_id__in=hobby_category)
+        category_serializer = CategorySerializer(categories, many=True)
+        return Response(category_serializer.data)
 
-    def get_queryset(self):
-        hobby_category = Category.objects.get(name='Hobbi')
-        return hobby_category.get_ancestors(ascending=True)
 
-class OtdamDaromCategoryParentsView(generics.ListAPIView):
-    serializer_class = CategorySerializer
 
-    def get_queryset(self):
-        otdam_darom_category = Category.objects.get(name='Otdam darom')
-        return otdam_darom_category.get_ancestors(ascending=True)
-
-class ObmenCategoryParentsView(generics.ListAPIView):
-    serializer_class = CategorySerializer
-
-    def get_queryset(self):
-        obmen_category = Category.objects.get(name='Obmen')
-        return obmen_category.get_ancestors(ascending=True)

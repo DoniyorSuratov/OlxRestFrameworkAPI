@@ -33,7 +33,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     slug = models.SlugField(blank=True, null=True)
     expires_at = models.DateTimeField(auto_now_add=True)
-    product_type = models.JSONField(null=True)
+    product_type = models.JSONField(blank=True, null=True)
     image = models.ImageField(upload_to=slugify_upload, blank=True, null=True)
 
     def save(self, *args, **kwargs):

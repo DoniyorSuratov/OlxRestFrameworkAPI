@@ -13,7 +13,12 @@ class FavouritsSerializer(serializers.ModelSerializer):
         model = Favourite
         fields = '__all__'
 
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = '__all__'
+
+
+class QuerySerializer(serializers.Serializer):
+    query = serializers.CharField()
