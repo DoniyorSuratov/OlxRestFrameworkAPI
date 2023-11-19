@@ -5,7 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from accounts.serializers import UserSerializer
 from .models import SellMessages, BuyMessage
 from .serializers import SellMessagesSerializer, BuyMessagesSerializer
-
+from rest_framework_simplejwt.tokens import RefreshToken, OutstandingToken, BlacklistedToken
+from rest_framework import status
 User = get_user_model()
 
 class RegisterAPIView(APIView):
@@ -90,5 +91,24 @@ class BuyMessagesAPIView(APIView):
         message_serializer = BuyMessagesSerializer(messages)
         return Response(message_serializer.data)
 
+class LogoutView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        refresh_token = request.data.get('refresh')
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+
+        return Response({"succes":"Loged out"},status=status.HTTP_204_NO_CONTENT)
+
+
+class LogoutFromAllView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        tokens = OutstandingToken.objects.filter(user_id=request.user.id)
+        for token in tokens:
+            t, _ = BlacklistedToken.objects.get_or_create(token=token) #(t == <BlacklistedToken: Blacklisted token for user>,)  === > _ ==  False or true
+        return Response({"succes":"All sessions loged out"}, status=status.HTTP_204_NO_CONTENT)
 
 

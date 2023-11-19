@@ -1,16 +1,10 @@
-import datetime
-from datetime import timedelta
-from django.views import View
-from accounts.permissions import AdminPermissions
 from .models import Product, Category, Favourite
 from .serializers import ProductSerializer, FavouritsSerializer
 from django.db.models import Q
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
-
+from rest_framework.pagination import PageNumberPagination
 
 
 # class ProductGetView(GenericAPIView):#get all products which are same slugs
@@ -56,7 +50,7 @@ class UserAdverView(GenericAPIView):    #Get all advertisement of authenticated 
 
 class ProductPostView(GenericAPIView): #Posting advertisement
     permission_classes = (IsAuthenticated, )
-    serializer = ProductSerializer
+    serializer_class = ProductSerializer
 
 
     def post(self, request):
@@ -153,3 +147,10 @@ class FavouriteGetView(GenericAPIView): #getting favourite items
 
         favourite_serializer = FavouritsSerializer(my_favourites, many=True)
         return Response(favourite_serializer.data)
+
+
+
+class CustomPageNumberView(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
