@@ -99,6 +99,7 @@ class LogoutView(APIView):
         token = RefreshToken(refresh_token)
         token.blacklist()
 
+
         return Response({"succes":"Loged out"},status=status.HTTP_204_NO_CONTENT)
 
 
