@@ -10,5 +10,3 @@ class AdminPermissions(permissions.BasePermission):
             return user_role.name == 'user' or request.user.is_superuser
         except UserRole.DoesNotExist:
             return False
-
-
