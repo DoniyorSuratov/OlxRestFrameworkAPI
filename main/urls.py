@@ -12,7 +12,7 @@ urlpatterns=[
     path('product-update/<int:pk>', ProductUpdate.as_view(), name='product-update'),
     path('my-advertisement', UserAdverView.as_view(), name='my-advertisement'),
     path('favourits/<int:pk>', FavouriteAdverView.as_view(), name='favourits-post'),
-    path('favourits/', FavouriteGetView.as_view(), name='favourits-get'),
+    path('favourits', FavouriteGetView.as_view(), name='favourits-get'),
     path('delete-my-advertisement/<int:pk>', ProductDeleteView.as_view(), name='delete-my-advertisement')
 
 ]
