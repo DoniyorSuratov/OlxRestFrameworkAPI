@@ -1,6 +1,5 @@
 from rest_framework import permissions
 from .models import UserRole
-from rest_framework.permissions import BasePermission
 
 
 

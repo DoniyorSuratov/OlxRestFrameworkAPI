@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
+from rest_framework import status
 
 
 # class ProductGetView(GenericAPIView):#get all products which are same slugs
@@ -76,7 +77,6 @@ class ProductUpdate(GenericAPIView):    #Changing own advertisement infos
     permission_classes = (IsAuthenticated,)
 
     def put(self, request, pk):
-        print(request.data)
         name = request.data.get('name')
         price = request.data.get('price')
         engine = request.data.get('engine')
@@ -112,27 +112,29 @@ class ProductUpdate(GenericAPIView):    #Changing own advertisement infos
         return Response(product_serializer.data)
 
 
-class FavouriteAdverView(GenericAPIView): #adding to favourits
+
+class FavouriteAdverView(GenericAPIView):
     permission_classes = (IsAuthenticated,)
-    serializer_classes = FavouritsSerializer
+    serializer_class = FavouritsSerializer
 
     def post(self, request, pk):
         user = request.user
-        product = Product.objects.get(pk=pk)
-        print(request.data)
+        product = Product.objects.get( pk=pk)
+
         favourits = Favourite.objects.create(
             user=user,
             product=product
         )
-        favourits.save()
         favourits_serializer = FavouritsSerializer(favourits)
-        return Response(favourits_serializer.data)
+        return Response(favourits_serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, pk):
-        Favourite.objects.get(pk=pk).delete()
-        favourite = Favourite.objects.filter(user=request.user)
-        favourite_serializer = FavouritsSerializer(favourite, many=True)
-        return Response(favourite_serializer.data)
+        try:
+            favourite = Favourite.objects.get(pk=pk, user=request.user)
+            favourite.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Favourite.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class FavouriteGetView(GenericAPIView): #getting favourite items
