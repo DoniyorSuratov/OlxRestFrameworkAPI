@@ -8,10 +8,10 @@ from rest_framework_simplejwt.tokens import RefreshToken, OutstandingToken, Blac
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
+from main.tasks import send_email_reset
 
 
 User = get_user_model()
@@ -130,17 +130,15 @@ class PasswordResetRequestView(GenericAPIView):
 
         if user:
             uid = urlsafe_base64_encode(force_bytes(user.pk))
-
             token = default_token_generator.make_token(user)
 
-            reset_link = f"http://127.0.0.1:8000/accounts/reset-password-confirm/{uid}/{token}/"
 
-            send_mail(
-                'Password Reset Request',
-                f'Click the following link to reset your password: {reset_link}',
-                'from@example.com',
-                [email],
-                fail_silently=False,
+            send_email_reset.delay(
+                email,
+                uid,
+                token,
+
+
             )
 
             return Response({'detail': 'Password reset link sent to your email.'}, status=202)
