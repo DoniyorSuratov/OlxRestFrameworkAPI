@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.views import get_user_model
 
-from .models import SellMessages, BuyMessage, UsingResetEmail
+from .models import SellMessages, BuyMessage
 
 User = get_user_model()
 

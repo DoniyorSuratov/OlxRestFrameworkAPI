@@ -63,6 +63,7 @@ class ProductPostView(GenericAPIView): #Posting advertisement
 
 
 class ProductDeleteView(GenericAPIView): #Delete own advertisement
+    queryset = Product.objects.all()
     permission_classes = (IsAuthenticated,)
     serializer = ProductSerializer
     def delete(self, request, pk):
@@ -73,6 +74,7 @@ class ProductDeleteView(GenericAPIView): #Delete own advertisement
 
 
 class ProductUpdate(GenericAPIView):    #Changing own advertisement infos
+    queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = (IsAuthenticated,)
 
@@ -114,6 +116,7 @@ class ProductUpdate(GenericAPIView):    #Changing own advertisement infos
 
 
 class FavouriteAdverView(GenericAPIView):
+    queryset = Favourite.objects.all()
     permission_classes = (IsAuthenticated,)
     serializer_class = FavouritsSerializer
 
@@ -138,8 +141,9 @@ class FavouriteAdverView(GenericAPIView):
 
 
 class FavouriteGetView(GenericAPIView): #getting favourite items
+    queryset = Favourite.objects.all()
     permission_classes = (IsAuthenticated,)
-    serializer_classes = FavouritsSerializer
+    serializer_class = FavouritsSerializer
 
     def get(self, request):
         try:

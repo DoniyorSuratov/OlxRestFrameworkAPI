@@ -10,7 +10,7 @@ COPY . .
 # Ensure Unix line endings and make the entrypoint script executable
 RUN sed -i 's/\r$//g' /app/entrypoint.sh \
     && chmod +x /app/entrypoint.sh
-RUN apk add --no-cache docker-compose
+
 # Install Python dependencies from requirements.txt
 RUN pip install -r /app/requirements.txt
 
