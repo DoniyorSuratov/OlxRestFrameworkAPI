@@ -28,3 +28,11 @@ class UserRole(models.Model):
     def __str__(self):
         return self.user.username
 
+
+class UsingResetEmail(models.Model):
+    email = models.EmailField()
+    password = models.CharField(max_length=12)
+
+
+
+

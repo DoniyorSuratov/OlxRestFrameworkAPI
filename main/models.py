@@ -52,3 +52,8 @@ class Product(models.Model):
 
     def __str__(self):
         return self.category.name
+
+
+class Favourite(models.Model):
+    user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)

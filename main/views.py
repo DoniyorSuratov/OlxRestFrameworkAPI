@@ -1,34 +1,43 @@
-import datetime
-from datetime import timedelta
-from django.views import View
-from accounts.permissions import AdminPermissions
-from .models import Product, Category
-from .serializers import ProductSerializer
+from .models import Product, Category, Favourite
+from .serializers import ProductSerializer, FavouritsSerializer
 from django.db.models import Q
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
+from rest_framework import status
+
+
+# class ProductGetView(GenericAPIView):#get all products which are same slugs
+#     permission_classes = ()
+#     serializer_class = ProductSerializer
+#
+#     def get(self, request, slug):
+#         try:
+#             selectedproduct = Product.objects.filter(slug=slug)
+#                           # .filter(Q(expires_at__gte=datetime.datetime.now()-timedelta(days=3)) & Q(expires_at__lte=datetime.datetime.now())))
+#         except Product.DoesNotExist:
+#             return Response({'success': False}, status=404)
+#         selectedproduct_serializer = ProductSerializer(selectedproduct, many=True)
+#         return Response(selectedproduct_serializer.data)
 
 
 
-class ProductGetView(GenericAPIView):
+class ProductGetView(GenericAPIView):#get all products
     permission_classes = ()
     serializer_class = ProductSerializer
 
-    #get all products which are same slugs
-    def get(self, request, slug):
+    def get(self, request):
         try:
-            selectedproduct = Product.objects.filter(slug=slug)
-                          # .filter(Q(expires_at__gte=datetime.datetime.now()-timedelta(days=3)) & Q(expires_at__lte=datetime.datetime.now())))
+            selectedproduct = Product.objects.all()
         except Product.DoesNotExist:
             return Response({'success': False}, status=404)
         selectedproduct_serializer = ProductSerializer(selectedproduct, many=True)
         return Response(selectedproduct_serializer.data)
 
 
-#Get all advertisement of authenticated user
-class UserAdverView(GenericAPIView):
+
+class UserAdverView(GenericAPIView):    #Get all advertisement of authenticated user
     permission_classes = (IsAuthenticated,)
     serializer_class = ProductSerializer
 
@@ -39,27 +48,37 @@ class UserAdverView(GenericAPIView):
         return Response(product_serializer.data)
 
 
-#Posting advertisement
-class ProductPostView(GenericAPIView):
+
+class ProductPostView(GenericAPIView): #Posting advertisement
     permission_classes = (IsAuthenticated, )
-    serializer = ProductSerializer
+    serializer_class = ProductSerializer
 
 
     def post(self, request):
         request.data['user']=request.user.id
-        detskiymir_serializer = ProductSerializer(data=request.data)
-        detskiymir_serializer.is_valid(raise_exception=True)
-        detskiymir_serializer.save()
-        return Response(detskiymir_serializer.data)
+        product_serializer = ProductSerializer(data=request.data)
+        product_serializer.is_valid(raise_exception=True)
+        product_serializer.save()
+        return Response(product_serializer.data)
 
 
-#Changing advertisement infos
-class ProductUpdate(GenericAPIView):
+class ProductDeleteView(GenericAPIView): #Delete own advertisement
+    queryset = Product.objects.all()
+    permission_classes = (IsAuthenticated,)
+    serializer = ProductSerializer
+    def delete(self, request, pk):
+        Product.objects.get(Q(pk=pk) & Q(user=request.user)).delete()
+        product = Product.objects.all()
+        product_serializer = ProductSerializer(product, many=True)
+        return Response(product_serializer.data)
+
+
+class ProductUpdate(GenericAPIView):    #Changing own advertisement infos
+    queryset = Product.objects.all()
     serializer_class = ProductSerializer
     permission_classes = (IsAuthenticated,)
 
     def put(self, request, pk):
-        print(request.data)
         name = request.data.get('name')
         price = request.data.get('price')
         engine = request.data.get('engine')
@@ -70,9 +89,9 @@ class ProductUpdate(GenericAPIView):
         stage =request.data.get('stage')
         status =request.data.get('status')
 
-        product_ = Product.objects.get(Q(user=request.user) & Q(pk=pk))
+        product_ = Product.objects.get(Q(user=request.user) & Q(pk=pk)) #gets only this users advertisements
 
-        print(product_.product_type)
+        #changes product_type infos
         product_.product_type.update({'price' : price})
         product_.product_type.update({'name' : name})
         if color:
@@ -103,3 +122,52 @@ class ProductGetVip(GenericAPIView):
         products = Product.objects.filter(status=3)
         product_serializer = ProductSerializer(products, many=True)
         return Response(product_serializer.data)
+
+      
+class FavouriteAdverView(GenericAPIView):
+    queryset = Favourite.objects.all()
+    permission_classes = (IsAuthenticated,)
+    serializer_class = FavouritsSerializer
+
+    def post(self, request, pk):
+        user = request.user
+        product = Product.objects.get( pk=pk)
+
+        favourits = Favourite.objects.create(
+            user=user,
+            product=product
+        )
+        favourits_serializer = FavouritsSerializer(favourits)
+        return Response(favourits_serializer.data, status=status.HTTP_201_CREATED)
+
+      
+    def delete(self, request, pk):
+        try:
+            favourite = Favourite.objects.get(pk=pk, user=request.user)
+            favourite.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Favourite.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class FavouriteGetView(GenericAPIView): #getting favourite items
+    queryset = Favourite.objects.all()
+    permission_classes = (IsAuthenticated,)
+    serializer_class = FavouritsSerializer
+
+    def get(self, request):
+        try:
+            my_favourites = Favourite.objects.filter(user=request.user)
+        except Favourite.DoesNotExist:
+            return Response({'succes': "You don't have favourite items "},status=404 )
+
+        favourite_serializer = FavouritsSerializer(my_favourites, many=True)
+        return Response(favourite_serializer.data)
+
+
+
+class CustomPageNumberView(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
