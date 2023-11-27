@@ -95,3 +95,11 @@ class ProductUpdate(GenericAPIView):
         return Response(product_serializer.data)
 
 
+class ProductGetVip(GenericAPIView):
+    permission_classes = ()
+    serializer_class = ProductSerializer
+
+    def get(self, request):
+        products = Product.objects.filter(status=3)
+        product_serializer = ProductSerializer(products, many=True)
+        return Response(product_serializer.data)
