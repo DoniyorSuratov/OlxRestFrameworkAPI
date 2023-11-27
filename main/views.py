@@ -114,7 +114,16 @@ class ProductUpdate(GenericAPIView):    #Changing own advertisement infos
         return Response(product_serializer.data)
 
 
+class ProductGetVip(GenericAPIView):
+    permission_classes = ()
+    serializer_class = ProductSerializer
 
+    def get(self, request):
+        products = Product.objects.filter(status=3)
+        product_serializer = ProductSerializer(products, many=True)
+        return Response(product_serializer.data)
+
+      
 class FavouriteAdverView(GenericAPIView):
     queryset = Favourite.objects.all()
     permission_classes = (IsAuthenticated,)
@@ -131,6 +140,7 @@ class FavouriteAdverView(GenericAPIView):
         favourits_serializer = FavouritsSerializer(favourits)
         return Response(favourits_serializer.data, status=status.HTTP_201_CREATED)
 
+      
     def delete(self, request, pk):
         try:
             favourite = Favourite.objects.get(pk=pk, user=request.user)
@@ -160,3 +170,4 @@ class CustomPageNumberView(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 100
+

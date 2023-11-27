@@ -29,12 +29,18 @@ class Category(MPTTModel):
 
 
 class Product(models.Model):
+    STATUS_CHOICES = [
+        (1, 'Free'),
+        (2, 'Seven days'),
+        (3, 'Vip')
+    ]
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     slug = models.SlugField(blank=True, null=True)
     expires_at = models.DateTimeField(auto_now_add=True)
     product_type = models.JSONField(null=True)
     image = models.ImageField(upload_to=slugify_upload, blank=True, null=True)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=1)
 
     def save(self, *args, **kwargs):
         if not self.slug:
