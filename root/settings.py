@@ -16,7 +16,6 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -27,7 +26,6 @@ SECRET_KEY = 'django-insecure-iy^)u($j8-7$bcuqyks0de1_m@lz$=im5l=+04f5ckbgz+8^=o
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -40,13 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'drf_yasg',
 
-
-    #custom
+    # custom
     'main',
     'accounts',
 
-
-    #third-party
+    # third-party
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
@@ -65,8 +61,8 @@ MIDDLEWARE = [
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=120),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
-    "ROTATE_REFRESH_TOKENS": True, #it was changet from false to true
-    "BLACKLIST_AFTER_ROTATION": True, #it was changet from false to true
+    "ROTATE_REFRESH_TOKENS": True,  # it was changet from false to true
+    "BLACKLIST_AFTER_ROTATION": True,  # it was changet from false to true
     "UPDATE_LAST_LOGIN": False,
 
     "ALGORITHM": "HS256",
@@ -91,7 +87,7 @@ SIMPLE_JWT = {
     "JTI_CLAIM": "jti",
 
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
-    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=25),
     "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
 
     "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
@@ -101,9 +97,6 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
-
-
-
 
 ROOT_URLCONF = 'root.urls'
 
@@ -125,28 +118,39 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'root.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+
+env_file_path = '.env'
+
+# Read the variables from the file
+with open(env_file_path, 'r') as file:
+    for line in file:
+        # Strip leading and trailing whitespaces and split the line into key-value pairs
+        key, value = map(str.strip, line.split('=', 1))
+
+        # Set the environment variable
+        os.environ[key] = value
+
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ.get('DJANGO_DB_NAME'),
-        'USER': os.environ.get('DJANGO_DB_USER'),
-        'PASSWORD': os.environ.get('DJANGO_DB_PASSWORD'),
-        'HOST': os.environ.get('DJANGO_DB_HOST'),
-        'PORT': os.environ.get('DJANGO_DB_PORT')
+        'NAME': os.getenv('DJANGO_DB_NAME'),
+        'USER': os.getenv('DJANGO_DB_USER'),
+        'PASSWORD': os.getenv('DJANGO_DB_PASSWORD'),
+        'HOST': os.getenv('DJANGO_DB_HOST'),
+        'PORT': os.getenv('DJANGO_DB_PORT')
     }
 }
 SWAGGER_SETTINGS = {
-   'SECURITY_DEFINITIONS': {
-      'Bearer': {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
             'type': 'apiKey',
             'name': 'Authorization',
             'in': 'header'
-      }
-   }
+        }
+    }
 }
 
 # Password validation
@@ -167,13 +171,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
@@ -185,7 +187,6 @@ TIME_ZONE = 'Asia/Tashkent'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -199,14 +200,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_TIMEZONE = TIME_ZONE
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'ruslanovrahmet@gmail.com'
-EMAIL_HOST_PASSWORD = 'hxcleicnkqftuqjc'
+EMAIL_HOST_USER = 'sarvarmahammadaliev0@gmail.com'
+EMAIL_HOST_PASSWORD = 'dcfkvbumtpqbtdnz'
