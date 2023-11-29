@@ -1,11 +1,22 @@
+from .documents import DocumentProduct
 from .models import Product, Category, Favourite
-from .serializers import ProductSerializer, FavouritsSerializer
+from .serializers import ProductSerializer, FavouritsSerializer, ProductDocumentSerializer
 from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
+from elasticsearch_dsl import Search, Q
+from django_elasticsearch_dsl_drf.constants import SUGGESTER_COMPLETION
+from django_elasticsearch_dsl_drf.filter_backends import SearchFilterBackend, FilteringFilterBackend, SuggesterFilterBackend
+from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
+from django_elasticsearch_dsl_drf.pagination import PageNumberPagination
+from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
+from django_elasticsearch_dsl_drf.filter_backends import (
+    FilteringFilterBackend,
+    SearchFilterBackend,
+    SuggesterFilterBackend,
+)
 
 
 # class ProductGetView(GenericAPIView):#get all products which are same slugs
@@ -171,3 +182,69 @@ class CustomPageNumberView(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
 
+class ProductSearchViewSet(DocumentViewSet):
+    document = DocumentProduct
+    serializer_class = ProductDocumentSerializer
+    pagination_class = CustomPageNumberView
+
+    filter_backends = [
+        FilteringFilterBackend,
+        SearchFilterBackend,
+        SuggesterFilterBackend,
+    ]
+
+    search_fields = (
+        'slug',
+        'title',
+        'color',
+    )
+
+    filter_fields = {
+        'title': 'title',
+        'slug': 'slug',
+        'color': 'color',
+    }
+
+    suggester_fields = {
+        'title': {
+            'field': 'title.suggest',
+            'suggesters': [
+                SUGGESTER_COMPLETION,
+            ],
+        },
+        'slug': {
+            'field': 'slug.suggest',
+            'suggesters': [
+                SUGGESTER_COMPLETION,
+            ],
+        },
+        'color': {
+            'field': 'color.suggest',
+            'suggesters': [
+                SUGGESTER_COMPLETION,
+            ],
+        }
+    }
+    def list(self, request, *args, **kwargs):
+        search_term = self.request.query_params.get('search', '')
+
+        # Check if the search term is empty or too short
+        # if len(search_term) == 0:
+        # Handle short or empty search term (adjust the condition as needed)
+        # return Response([])
+
+        # Use a Q object to build a more robust query
+        query = Q('multi_match', query=search_term, fields=self.search_fields)
+
+        # Apply the query to the queryset
+        queryset = self.filter_queryset(self.get_queryset().query(query))
+        print('Queryset >>>>>', queryset)
+
+        # Perform pagination
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

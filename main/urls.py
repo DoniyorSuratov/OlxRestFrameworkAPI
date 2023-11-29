@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from .views import (ProductPostView,
                     ProductGetView,
                     ProductUpdate,
@@ -6,7 +6,11 @@ from .views import (ProductPostView,
                     FavouriteAdverView,
                     FavouriteGetView,
                     ProductDeleteView,
-                    ProductGetVip)
+                    ProductGetVip, ProductSearchViewSet)
+from rest_framework import routers
+
+router = routers.DefaultRouter(trailing_slash=False)
+router.register('product-search', ProductSearchViewSet, basename='search_todo')
 
 urlpatterns=[
     path('get-product',ProductGetView.as_view(), name='get-advertisement'),
@@ -16,7 +20,8 @@ urlpatterns=[
     path('product-vips', ProductGetVip.as_view(), name='product-vips'),
     path('favourits/<int:pk>', FavouriteAdverView.as_view(), name='favourits-post'),
     path('favourits', FavouriteGetView.as_view(), name='favourits-get'),
-    path('delete-my-advertisement/<int:pk>', ProductDeleteView.as_view(), name='delete-my-advertisement')
+    path('delete-my-advertisement/<int:pk>', ProductDeleteView.as_view(), name='delete-my-advertisement'),
+    path('', include(router.urls))
 ]
 
 

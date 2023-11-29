@@ -36,6 +36,8 @@ class Product(models.Model):
     ]
     user = models.ForeignKey('auth.User', on_delete=models.CASCADE)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    title = models.TextField(blank=True, null=True)
+    color = models.TextField(blank=True, null=True)
     slug = models.SlugField(blank=True, null=True)
     expires_at = models.DateTimeField(auto_now_add=True)
     product_type = models.JSONField(null=True)

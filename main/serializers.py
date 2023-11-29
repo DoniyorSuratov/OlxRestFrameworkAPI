@@ -1,6 +1,7 @@
 from rest_framework import serializers
+from .documents import DocumentProduct
 from .models import Product, Favourite
-
+from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -12,3 +13,9 @@ class FavouritsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favourite
         fields = '__all__'
+
+class ProductDocumentSerializer(DocumentSerializer):
+
+    class Meta:
+        document = DocumentProduct
+        fields = ('title', 'slug', 'color')

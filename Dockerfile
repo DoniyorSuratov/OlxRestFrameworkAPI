@@ -12,7 +12,8 @@ RUN sed -i 's/\r$//g' /app/entrypoint.sh \
     && chmod +x /app/entrypoint.sh
 
 # Install Python dependencies from requirements.txt
-RUN pip install -r /app/requirements.txt
+RUN --mount=type=cache,id=custom-pip,target=/root/.cache/pip pip install -r requirements.txt
+#pip install -r /app/requirements.txtproduct_type__
 
 # Set the entrypoint for the container
 ENTRYPOINT ["/app/entrypoint.sh"]
