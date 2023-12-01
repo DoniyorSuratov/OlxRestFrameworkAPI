@@ -42,6 +42,7 @@ class Product(models.Model):
     expires_at = models.DateTimeField(auto_now_add=True)
     product_type = models.JSONField(null=True)
     image = models.ImageField(upload_to=slugify_upload, blank=True, null=True)
+    price = models.FloatField(blank=True, null=True)
     status = models.IntegerField(choices=STATUS_CHOICES, default=1)
 
     def save(self, *args, **kwargs):

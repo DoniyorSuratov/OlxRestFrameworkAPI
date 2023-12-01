@@ -27,6 +27,8 @@ from drf_yasg import openapi
 from django.conf import settings
 from django.conf.urls.static import static
 
+from main.views import ProductFilterView
+
 schema_view = get_schema_view(
    openapi.Info(
       title="olx API",
@@ -51,7 +53,6 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-
 
 ]
 

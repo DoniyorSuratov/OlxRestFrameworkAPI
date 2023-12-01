@@ -1,9 +1,10 @@
+from .custom_filters import ProductFilter
 from .documents import DocumentProduct
 from .models import Product, Category, Favourite
 from .serializers import ProductSerializer, FavouritsSerializer, ProductDocumentSerializer
 from django.db.models import Q
 from rest_framework.response import Response
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView,ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from elasticsearch_dsl import Search, Q
@@ -12,6 +13,7 @@ from django_elasticsearch_dsl_drf.filter_backends import SearchFilterBackend, Fi
 from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
 from django_elasticsearch_dsl_drf.pagination import PageNumberPagination
 from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
+from django_filters import rest_framework as filters
 from django_elasticsearch_dsl_drf.filter_backends import (
     FilteringFilterBackend,
     SearchFilterBackend,
@@ -73,15 +75,26 @@ class ProductPostView(GenericAPIView): #Posting advertisement
         return Response(product_serializer.data)
 
 
-class ProductDeleteView(GenericAPIView): #Delete own advertisement
+
+
+
+
+class ProductDeleteView(GenericAPIView):
+    serializer = ProductSerializer
     queryset = Product.objects.all()
     permission_classes = (IsAuthenticated,)
-    serializer = ProductSerializer
+
     def delete(self, request, pk):
-        Product.objects.get(Q(pk=pk) & Q(user=request.user)).delete()
-        product = Product.objects.all()
-        product_serializer = ProductSerializer(product, many=True)
-        return Response(product_serializer.data)
+        # Ensure the product exists and is owned by the current user
+        try:
+            product = Product.objects.get(pk=pk, user=request.user)
+            product.delete()
+            return Response({"detail": "Product delated"})
+        except Product.DoesNotExist:
+            return Response({"detail": "Product not found or you don't have permission to delete it."},
+                            status=status.HTTP_404_NOT_FOUND)
+
+
 
 
 class ProductUpdate(GenericAPIView):    #Changing own advertisement infos
@@ -248,3 +261,11 @@ class ProductSearchViewSet(DocumentViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class ProductFilterView(ListAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    permission_classes = ()
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = ProductFilter
