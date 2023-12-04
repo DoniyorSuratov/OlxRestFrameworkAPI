@@ -6,7 +6,7 @@ from .views import (ProductPostView,
                     FavouriteAdverView,
                     FavouriteGetView,
                     ProductDeleteView,
-                    ProductGetVip, ProductSearchViewSet, ProductFilterView)
+                    ProductGetVip, ProductSearchViewSet, ProductFilterView, CategoryAddView)
 from rest_framework import routers
 
 router = routers.DefaultRouter(trailing_slash=False)
@@ -23,6 +23,7 @@ urlpatterns=[
     path('delete-my-advertisement/<int:pk>', ProductDeleteView.as_view(), name='delete-my-advertisement'),
     path('', include(router.urls)),
     path('product-filter-for-price', ProductFilterView.as_view(), name='product-filter-for-price'),
+    path('category-add', CategoryAddView.as_view(), name='category-add')
 ]
 
 

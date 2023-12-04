@@ -1,7 +1,8 @@
+from accounts.permissions import AdminPermissions
 from .custom_filters import ProductFilter
 from .documents import DocumentProduct
 from .models import Product, Category, Favourite
-from .serializers import ProductSerializer, FavouritsSerializer, ProductDocumentSerializer
+from .serializers import ProductSerializer, FavouritsSerializer, ProductDocumentSerializer, CategoryProductSerializer
 from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView,ListAPIView
@@ -33,6 +34,27 @@ from django_elasticsearch_dsl_drf.filter_backends import (
 #             return Response({'success': False}, status=404)
 #         selectedproduct_serializer = ProductSerializer(selectedproduct, many=True)
 #         return Response(selectedproduct_serializer.data)
+
+class CategoryAddView(GenericAPIView):
+    permission_classes = (AdminPermissions,)
+    serializer_class = CategoryProductSerializer
+
+    def post(self, request):
+        name = request.data.get("name")
+        parent = request.data.get("parent")
+        obj = Category.objects.create(
+            name = name,
+            parent_id=None if parent is None else parent
+        )
+        obj.save()
+        obj_serializer = CategoryProductSerializer(obj)
+        return Response(obj_serializer.data)
+
+
+    def get(self, request):
+        categories = Category.objects.all()
+        categories_serializer = CategoryProductSerializer(categories, many=True)
+        return Response(categories_serializer.data)
 
 
 
@@ -119,7 +141,7 @@ class ProductUpdate(GenericAPIView):    #Changing own advertisement infos
         product_.product_type.update({'price' : price})
         product_.product_type.update({'name' : name})
         if color:
-            product_.product_type.update({'color' : color})
+            product_.color.update({'color' : color})
         if engine:
             product_.product_type.update({'engine' : engine})
         if room_num:

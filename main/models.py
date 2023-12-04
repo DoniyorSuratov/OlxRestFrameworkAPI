@@ -28,6 +28,7 @@ class Category(MPTTModel):
         verbose_name_plural = 'Categories'
 
 
+
 class Product(models.Model):
     STATUS_CHOICES = [
         (1, 'Free'),
